@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "7540:7540"
+    environment:
+      TODO_PORT: 7540
+      TODO_DBFILE: scheduler.db
+      TODO_PASSWORD: "your_password"
+    volumes:
+      - ./scheduler.db:/root/scheduler.db

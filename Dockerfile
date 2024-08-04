@@ -1,21 +1,19 @@
-FROM golang:1.22.3 as builder
+FROM golang:1.18-alpine AS builder
 
 WORKDIR /app
 
 COPY . .
 
+RUN go mod tidy
 RUN go build -o main .
 
-FROM ubuntu:latest
+FROM alpine:latest
 
-WORKDIR /app
+WORKDIR /root/
 
 COPY --from=builder /app/main .
 COPY --from=builder /app/web ./web
 
 EXPOSE 7540
-
-ENV TODO_PORT=7540
-ENV TODO_PASSWORD=your_password
 
 CMD ["./main"]
