@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
@@ -11,7 +12,6 @@ import (
 )
 
 func main() {
-	// Инициализация базы данных
 	db, err := database.InitDB()
 	if err != nil {
 		log.Fatalf("Ошибка инициализации базы данных: %v", err)
@@ -22,19 +22,19 @@ func main() {
 		port = "7540"
 	}
 
-	// Регистрация маршрутов и передача экземпляра базы данных в обработчики
-	http.HandleFunc("/api/signin", auth.SigninHandler(db))
+	r := mux.NewRouter()
 
-	http.HandleFunc("/api/task", auth.Auth(api.AddTaskHandler(db), db))
-	http.HandleFunc("/api/tasks", auth.Auth(api.GetTasksHandler(db), db))
-	http.HandleFunc("/api/task/done", auth.Auth(api.MarkTaskDoneHandler(db), db))
-	http.HandleFunc("/api/task/delete", auth.Auth(api.DeleteTaskHandler(db), db)) // Регистрация обработчика удаления
+	r.HandleFunc("/api/signin", auth.SigninHandler(db)).Methods("POST")
 
-	// Регистрация файлового сервера для фронтенда
+	r.HandleFunc("/api/task", auth.Auth(api.AddTaskHandler(db), db)).Methods("POST")
+	r.HandleFunc("/api/tasks", auth.Auth(api.GetTasksHandler(db), db)).Methods("GET")
+	r.HandleFunc("/api/task/done", auth.Auth(api.MarkTaskDoneHandler(db), db)).Methods("POST")
+	r.HandleFunc("/api/task/delete/{id}", auth.Auth(api.DeleteTask(db), db)).Methods("DELETE")
+
 	webDir := "web"
 	fs := http.FileServer(http.Dir(webDir))
-	http.Handle("/", fs)
+	r.PathPrefix("/").Handler(fs)
 
 	log.Printf("Запуск сервера на порту %s", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, r))
 }

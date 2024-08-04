@@ -14,7 +14,6 @@ import (
 	"time"
 )
 
-// Task представляет задачу
 type Task struct {
 	ID      string `json:"id" db:"id"`
 	Date    string `json:"date" db:"date"`
@@ -23,7 +22,6 @@ type Task struct {
 	Repeat  string `json:"repeat" db:"repeat"`
 }
 
-// Response представляет ответ сервера
 type Response struct {
 	ID       string `json:"id,omitempty"`
 	Error    string `json:"error,omitempty"`
@@ -31,7 +29,6 @@ type Response struct {
 	NextDate string `json:"nextDate,omitempty"`
 }
 
-// AddTaskHandler обработчик для добавления задачи
 func AddTaskHandler(db *sqlx.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var task Task
@@ -102,7 +99,6 @@ func AddTaskHandler(db *sqlx.DB) http.HandlerFunc {
 	}
 }
 
-// GetTasksHandler обработчик для получения списка задач
 func GetTasksHandler(db *sqlx.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		rows, err := db.Queryx("SELECT id, date, title, comment, repeat FROM scheduler ORDER BY date LIMIT 50")
@@ -132,7 +128,6 @@ func GetTasksHandler(db *sqlx.DB) http.HandlerFunc {
 	}
 }
 
-// MarkTaskDoneHandler обработчик для отметки задачи выполненной
 func MarkTaskDoneHandler(db *sqlx.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Query().Get("id")
@@ -178,27 +173,6 @@ func MarkTaskDoneHandler(db *sqlx.DB) http.HandlerFunc {
 	}
 }
 
-// DeleteTaskHandler обработчик для удаления задачи
-func DeleteTaskHandler(db *sqlx.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id := r.URL.Query().Get("id")
-		if id == "" {
-			http.Error(w, `{"error": "Не указан идентификатор"}`, http.StatusBadRequest)
-			return
-		}
-
-		err := database.DeleteTask(db, id)
-		if err != nil {
-			http.Error(w, `{"error": "Ошибка при удалении задачи"}`, http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(Response{})
-	}
-}
-
-// DeleteTask удаляет задачу по ID
 func DeleteTask(db *sqlx.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)

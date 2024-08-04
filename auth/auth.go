@@ -21,7 +21,6 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-// SigninHandler обрабатывает вход пользователя и возвращает JWT токен
 func SigninHandler(db *sqlx.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var creds Credentials
@@ -67,7 +66,6 @@ func SigninHandler(db *sqlx.DB) http.HandlerFunc {
 	}
 }
 
-// Auth проверяет JWT токен
 func Auth(next http.HandlerFunc, db *sqlx.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		pass := os.Getenv("TODO_PASSWORD")

@@ -11,7 +11,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// InitDB инициализирует базу данных
 func InitDB() (*sqlx.DB, error) {
 	appPath, err := os.Executable()
 	if err != nil {
@@ -51,11 +50,10 @@ func InitDB() (*sqlx.DB, error) {
 }
 
 var (
-	tasks = make(map[string]string) // Пример хранения задач в памяти (если необходимо)
+	tasks = make(map[string]string)
 	mu    sync.Mutex
 )
 
-// DeleteTask удаляет задачу из базы данных по ID
 func DeleteTask(db *sqlx.DB, id string) error {
 	mu.Lock()
 	defer mu.Unlock()
